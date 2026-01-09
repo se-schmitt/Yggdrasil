@@ -1,5 +1,8 @@
 using BinaryBuilder, Pkg
 
+const YGGDRASIL_DIR = "../.."
+include(joinpath(YGGDRASIL_DIR, "platforms", "macos_sdks.jl"))
+
 name = "RDKit"
 version = v"2025.09.3"
 
@@ -17,6 +20,7 @@ atomic_patch -p1 ../patches/do-not-build-cffi-test.patch
 FLAGS=()
 if [[ "${target}" == *-mingw* ]]; then
     FLAGS+=(-DRDK_BUILD_THREADSAFE_SSS=OFF)
+    FLAGS+=(-DBoost_DIR=${libdir}/cmake/Boost-1.87.0/)
 fi
 
 mkdir build
@@ -42,6 +46,8 @@ cmake \
 make -j${nproc}
 make install
 """
+
+sources, script = require_macos_sdk("11.0", sources, script)
 
 platforms = [
     Platform("x86_64", "linux"; libc="glibc"),
